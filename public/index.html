@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubunk eKYC</title>
+    <link rel="icon" type="image/png" href="/icon.png">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --gradient: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+            --bg-light: #f8fafc;
+            --text-dark: #22223b;
+            --text-gray: #6b7280;
+            --border: #e5e7eb;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+        }
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.7rem 1.5rem;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            letter-spacing: 0.5px;
+        }
+        .logo img {
+            height: 32px;
+            width: 32px;
+            margin-right: 10px;
+        }
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        .start-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6rem 1.3rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .start-btn:hover {
+            background: #1d4ed8;
+        }
+        .hero {
+            background: var(--gradient);
+            color: #fff;
+            text-align: center;
+            padding: 70px 20px 60px 20px;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.7rem;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            margin-bottom: 2.2rem;
+            color: #e0e7ef;
+        }
+        .hero .hero-btns {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .hero .hero-btns a {
+            background: #fff;
+            color: var(--primary);
+            border: 1.5px solid #fff;
+            border-radius: 6px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .hero .hero-btns a:hover {
+            background: #f1f5f9;
+            color: var(--secondary);
+        }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 60px auto 0 auto;
+            max-width: 1000px;
+        }
+        .feature {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            padding: 2rem 1.5rem;
+            flex: 1 1 0;
+            min-width: 220px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .feature-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.7rem;
+        }
+        .feature-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .feature-desc {
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+        .steps-section {
+            background: #fff;
+            margin: 60px 0 0 0;
+            padding: 50px 0;
+        }
+        .steps-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .step {
+            flex: 1 1 0;
+            min-width: 180px;
+            text-align: center;
+        }
+        .step-circle {
+            background: var(--primary);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 1rem auto;
+        }
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .step-desc {
+            color: var(--text-gray);
+            font-size: 0.98rem;
+        }
+        .docs-section {
+            background: var(--bg-light);
+            padding: 60px 0 40px 0;
+        }
+        .docs-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+        .docs-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .doc-card {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 1.5rem 1.2rem;
+            flex: 1 1 0;
+            min-width: 220px;
+        }
+        .doc-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .doc-desc {
+            color: var(--text-gray);
+            font-size: 0.98rem;
+            margin-bottom: 1rem;
+        }
+        .doc-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .doc-link:hover {
+            text-decoration: underline;
+        }
+        .cta-section {
+            background: var(--gradient);
+            color: #fff;
+            text-align: center;
+            padding: 50px 20px 40px 20px;
+            margin-top: 60px;
+        }
+        .cta-section .cta-btn {
+            background: #fff;
+            color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .cta-section .cta-btn:hover {
+            background: #f1f5f9;
+            color: var(--secondary);
+        }
+        footer {
+            background: #18181b;
+            color: #cbd5e1;
+            padding: 40px 0 20px 0;
+            margin-top: 0;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+        .footer-section {
+            min-width: 200px;
+        }
+        .footer-section h3 {
+            color: #fff;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-section ul li a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-section ul li a:hover {
+            color: var(--primary);
+        }
+        .footer-bottom {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 900px) {
+            .features, .steps, .docs-cards, .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav">
+            <div class="logo">
+                <img src="/icon.png" alt="Hubunk Logo" />
+                Hubunk
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#ekyc">eKYC</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <a href="#ekyc" class="start-btn">Start eKYC</a>
+        </div>
+    </header>
+    <section class="hero" id="home">
+        <h1>Selamat Datang di Hubunk eKYC</h1>
+        <p>Verifikasi identitas yang <b>aman</b>, <b>cepat</b>, dan sesuai standar yang didukung oleh Tencent Cloud</p>
+        <div class="hero-btns">
+            <a href="#ekyc">Mulai Verifikasi</a>
+            <a href="#docs">Dokumentasi</a>
+        </div>
+    </section>
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">🔒</div>
+            <div class="feature-title">Aman & Privat</div>
+            <div class="feature-desc">Data Anda dienkripsi dan diproses secara aman menggunakan infrastruktur keamanan tingkat perusahaan Tencent Cloud.</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">Pemrosesan Cepat</div>
+            <div class="feature-desc">Dapatkan hasil verifikasi dalam hitungan menit menggunakan sistem verifikasi berbasis AI canggih kami.</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">📋</div>
+            <div class="feature-title">Sesuai Standar</div>
+            <div class="feature-desc">Solusi eKYC kami memenuhi persyaratan regulasi dan standar industri untuk verifikasi identitas.</div>
+        </div>
+    </div>
+    <section class="steps-section" id="ekyc">
+        <div class="steps-title">Cara Kerjanya</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-circle">1</div>
+                <div class="step-title">Masukkan Informasi</div>
+                <div class="step-desc">Berikan nomor KTP dan nama lengkap sesuai yang tercantum pada dokumen resmi Anda.</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">2</div>
+                <div class="step-title">Upload Dokumen</div>
+                <div class="step-desc">Upload foto KTP yang jelas dan ambil selfie langsung untuk verifikasi wajah.</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-title">Dapatkan Verifikasi</div>
+                <div class="step-desc">Terima hasil verifikasi instan dengan status detail dan konfirmasi.</div>
+            </div>
+        </div>
+    </section>
+    <section class="docs-section" id="docs">
+        <div class="docs-title">Dokumentasi Lengkap</div>
+        <div class="docs-cards">
+            <div class="doc-card">
+                <div class="doc-title">📄 Dokumentasi Bahasa Indonesia</div>
+                <div class="doc-desc">Panduan lengkap dalam bahasa Indonesia untuk integrasi Tencent Cloud eKYC, termasuk contoh kode dan praktik terbaik.</div>
+                <a class="doc-link" href="#">Baca Dokumentasi</a>
+            </div>
+            <div class="doc-card">
+                <div class="doc-title">🌐 English Documentation</div>
+                <div class="doc-desc">Complete guide in English for Tencent Cloud eKYC integration, including code examples and best practices.</div>
+                <a class="doc-link" href="#">Read Documentation</a>
+            </div>
+        </div>
+    </section>
+    <section class="cta-section">
+        <h2>Siap untuk Memulai?</h2>
+        <p>Bergabunglah dengan ribuan pengguna yang mempercayai Hubunk eKYC untuk kebutuhan verifikasi identitas mereka.</p>
+        <a href="#ekyc" class="cta-btn">Mulai Verifikasi Anda Sekarang</a>
+    </section>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Hubunk</h3>
+                <p>Secure identity verification powered by Tencent Cloud. Fast, reliable, and compliant eKYC solutions for modern businesses.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#ekyc">eKYC Verification</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Security</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Hubunk. All rights reserved. Powered by Tencent Cloud.
+        </div>
+    </footer>
+</body>
+</html> 
