@@ -4,6 +4,6 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "tencentcloud-sdk-nodejs": "^4.1.75"
+    "tencentcloud-sdk-nodejs-intl-en": "^3.0.1212"
   }
 }
