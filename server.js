@@ -18,7 +18,7 @@ const FaceidClient = tencentcloud.faceid.v20180301.Client;
 const client = new FaceidClient({
   secretId: process.env.TENCENT_SECRET_ID,
   secretKey: process.env.TENCENT_SECRET_KEY,
-  region: process.env.TENCENT_REGION || "ap-singapore",
+  region: process.env.TENCENT_REGION || "ap-jakarta",
   endpoint: "faceid.intl.tencentcloudapi.com"
 });
 
@@ -26,7 +26,7 @@ const client = new FaceidClient({
 console.log('🔐 Client Configuration:');
 console.log(`   Secret ID: ${process.env.TENCENT_SECRET_ID ? process.env.TENCENT_SECRET_ID.substring(0, 8) + '...' : 'Not set'}`);
 console.log(`   Secret Key: ${process.env.TENCENT_SECRET_KEY ? process.env.TENCENT_SECRET_KEY.substring(0, 8) + '...' : 'Not set'}`);
-console.log(`   Region: ${process.env.TENCENT_REGION || 'ap-singapore'}`);
+console.log(`   Region: ${process.env.TENCENT_REGION || 'ap-jakarta'}`);
 console.log(`   Endpoint: faceid.intl.tencentcloudapi.com`);
 
 // Health check endpoint
@@ -43,7 +43,7 @@ app.get('/debug/env', (req, res) => {
   res.json({
     TENCENT_SECRET_ID: process.env.TENCENT_SECRET_ID ? 'Set' : 'Not set',
     TENCENT_SECRET_KEY: process.env.TENCENT_SECRET_KEY ? 'Set' : 'Not set',
-    TENCENT_REGION: process.env.TENCENT_REGION || 'ap-singapore',
+    TENCENT_REGION: process.env.TENCENT_REGION || 'ap-jakarta',
     TENCENT_APP_ID: process.env.TENCENT_APP_ID || 'Not set',
     TENCENT_SECURE_LEVEL: process.env.TENCENT_SECURE_LEVEL || '4',
     TENCENT_ID_CARD_TYPE: process.env.TENCENT_ID_CARD_TYPE || 'IDCARD',
@@ -63,7 +63,7 @@ app.get('/api/ekyc/token', async (req, res) => {
     console.log('📋 Using credentials:');
     console.log(`   Secret ID: ${process.env.TENCENT_SECRET_ID ? 'Set' : 'Not set'}`);
     console.log(`   Secret Key: ${process.env.TENCENT_SECRET_KEY ? 'Set' : 'Not set'}`);
-    console.log(`   Region: ${process.env.TENCENT_REGION || 'ap-singapore'}`);
+    console.log(`   Region: ${process.env.TENCENT_REGION || 'ap-jakarta'}`);
     console.log(`   App ID: ${process.env.TENCENT_APP_ID || 'Not set'}`);
     console.log(`   User ID: ${userId}`);
 
@@ -216,7 +216,7 @@ app.get('/api/ekyc/status', async (req, res) => {
       config: {
         hasSecretId: !!process.env.TENCENT_SECRET_ID,
         hasSecretKey: !!process.env.TENCENT_SECRET_KEY,
-        region: process.env.TENCENT_REGION || 'ap-singapore',
+        region: process.env.TENCENT_REGION || 'ap-jakarta',
         appId: process.env.TENCENT_APP_ID,
         secureLevel: process.env.TENCENT_SECURE_LEVEL || '4',
         idCardType: process.env.TENCENT_ID_CARD_TYPE || 'IDCARD',
