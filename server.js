@@ -943,6 +943,10 @@ app.post('/api/ekyc/save-ocr-preview', async (req, res) => {
     console.log('📝 Saving OCR preview data to database:');
     console.log('   userId:', userId);
     console.log('   ocrData:', JSON.stringify(ocrData, null, 2));
+    console.log('   ocrData keys:', Object.keys(ocrData));
+    console.log('   ocrData.nik:', ocrData.nik);
+    console.log('   ocrData.LicenseNumber:', ocrData.LicenseNumber);
+    console.log('   ocrData.licenseNumber:', ocrData.licenseNumber);
 
     const dbData = {
       user_id: userId,
@@ -972,6 +976,14 @@ app.post('/api/ekyc/save-ocr-preview', async (req, res) => {
       error_message: null,
       created_at: new Date()
     };
+
+    console.log('📋 Database data to be saved:');
+    console.log('   ktp_number:', dbData.ktp_number);
+    console.log('   name:', dbData.name);
+    console.log('   birth_place:', dbData.birth_place);
+    console.log('   birth_date:', dbData.birth_date);
+    console.log('   gender:', dbData.gender);
+    console.log('   address:', dbData.address);
 
     const saveResult = await saveEkycData(dbData);
     
