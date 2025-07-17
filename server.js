@@ -341,6 +341,169 @@ app.post('/api/ekyc/result', async (req, res) => {
         // Save data to database
         if (userId) {
           try {
+            // Enhanced KTP Number mapping - check multiple possible locations
+            let ktpNumber = null;
+            
+            // Check in ocrData first
+            if (ocrData && ocrData.IndonesiaIDCard) {
+              ktpNumber = ocrData.IndonesiaIDCard.LicenseNumber || ocrData.IndonesiaIDCard.licenseNumber;
+            }
+            
+            // Check in result.CardVerifyResults[0].NormalCardInfo.IndonesiaIDCard
+            if (!ktpNumber && result.CardVerifyResults && result.CardVerifyResults.length > 0) {
+              const cardVerifyResult = result.CardVerifyResults[0];
+              if (cardVerifyResult.NormalCardInfo && cardVerifyResult.NormalCardInfo.IndonesiaIDCard) {
+                ktpNumber = cardVerifyResult.NormalCardInfo.IndonesiaIDCard.LicenseNumber || 
+                           cardVerifyResult.NormalCardInfo.IndonesiaIDCard.licenseNumber;
+              }
+            }
+            
+            // Check in result.NormalCardInfo.IndonesiaIDCard (fallback)
+            if (!ktpNumber && result.NormalCardInfo && result.NormalCardInfo.IndonesiaIDCard) {
+              ktpNumber = result.NormalCardInfo.IndonesiaIDCard.LicenseNumber || 
+                         result.NormalCardInfo.IndonesiaIDCard.licenseNumber;
+            }
+            
+            // Debug logging
+            console.log('🔍 KTP Number Mapping Debug:');
+            console.log('   ocrData.IndonesiaIDCard:', ocrData?.IndonesiaIDCard);
+            console.log('   result.CardVerifyResults[0].NormalCardInfo.IndonesiaIDCard:', 
+                       result.CardVerifyResults?.[0]?.NormalCardInfo?.IndonesiaIDCard);
+            console.log('   result.NormalCardInfo.IndonesiaIDCard:', result.NormalCardInfo?.IndonesiaIDCard);
+            console.log('   ✅ Final KTP Number:', ktpNumber);
+
+            // Enhanced name mapping - check multiple possible locations
+            let name = null;
+            
+            // Check in ocrData first
+            if (ocrData) {
+              name = ocrData.name || ocrData.nama || ocrData.full_name || ocrData.fullName || 
+                     ocrData.nama_lengkap || ocrData.namaLengkap || ocrData.FullName;
+            }
+            
+            // Check in result.CardVerifyResults[0].NormalCardInfo.IndonesiaIDCard
+            if (!name && result.CardVerifyResults && result.CardVerifyResults.length > 0) {
+              const cardVerifyResult = result.CardVerifyResults[0];
+              if (cardVerifyResult.NormalCardInfo && cardVerifyResult.NormalCardInfo.IndonesiaIDCard) {
+                name = cardVerifyResult.NormalCardInfo.IndonesiaIDCard.FullName;
+              }
+            }
+            
+            // Enhanced gender mapping - check multiple possible locations
+            let gender = null;
+            
+            // Check in ocrData first
+            if (ocrData) {
+              gender = ocrData.gender || ocrData.jenis_kelamin || ocrData.jenisKelamin || 
+                       ocrData.sex || ocrData.jk || 
+                       (ocrData.Sex === 'LAKI-LAKI' ? 'L' : ocrData.Sex === 'PEREMPUAN' ? 'P' : null);
+            }
+            
+            // Check in result.CardVerifyResults[0].NormalCardInfo.IndonesiaIDCard
+            if (!gender && result.CardVerifyResults && result.CardVerifyResults.length > 0) {
+              const cardVerifyResult = result.CardVerifyResults[0];
+              if (cardVerifyResult.NormalCardInfo && cardVerifyResult.NormalCardInfo.IndonesiaIDCard) {
+                const sexValue = cardVerifyResult.NormalCardInfo.IndonesiaIDCard.Sex;
+                gender = sexValue === 'LAKI-LAKI' ? 'L' : sexValue === 'PEREMPUAN' ? 'P' : null;
+              }
+            }
+
+                            // Enhanced date parsing
+            const parseBirthDate = (dateStr) => {
+              if (!dateStr) return null;
+              
+              // Handle format "MALANG, 09-03-1997"
+              if (dateStr.includes(',')) {
+                const parts = dateStr.split(',');
+                if (parts.length >= 2) {
+                  const datePart = parts[1].trim();
+                  // Extract date from "09-03-1997"
+                  const dateMatch = datePart.match(/(\d{2})-(\d{2})-(\d{4})/);
+                  if (dateMatch) {
+                    const [, day, month, year] = dateMatch;
+                    return `${year}-${month}-${day}`;
+                  }
+                }
+              }
+              
+              // Handle other formats
+              return dateStr;
+            };
+
+
+
+    // Enhanced expiry date parsing
+    const parseExpiryDate = (dateStr) => {
+      if (!dateStr) return null;
+      
+      // Handle "SEUMUR HIDUP" (lifetime)
+      if (dateStr === 'SEUMUR HIDUP' || dateStr === 'LIFETIME') {
+        return null; // Set to null for lifetime
+      }
+      
+      // Handle other date formats
+      return dateStr;
+    };
+
+            // Enhanced field mapping - extract from CardVerifyResults if available
+            let birthPlace = null;
+            let birthDate = null;
+            let address = null;
+            let rtRw = null;
+            let village = null;
+            let district = null;
+            let city = null;
+            let province = null;
+            let religion = null;
+            let maritalStatus = null;
+            let occupation = null;
+            let nationality = null;
+            let expiryDate = null;
+            
+            // Check in result.CardVerifyResults[0].NormalCardInfo.IndonesiaIDCard
+            if (result.CardVerifyResults && result.CardVerifyResults.length > 0) {
+              const cardVerifyResult = result.CardVerifyResults[0];
+              if (cardVerifyResult.NormalCardInfo && cardVerifyResult.NormalCardInfo.IndonesiaIDCard) {
+                const indonesiaCard = cardVerifyResult.NormalCardInfo.IndonesiaIDCard;
+                
+                // Extract birth place and date from Birthday field
+                if (indonesiaCard.Birthday) {
+                  const birthdayParts = indonesiaCard.Birthday.split(',');
+                  if (birthdayParts.length >= 2) {
+                    birthPlace = birthdayParts[0].trim();
+                    birthDate = parseBirthDate(indonesiaCard.Birthday);
+                  }
+                }
+                
+                address = indonesiaCard.FormattedAddress;
+                rtRw = indonesiaCard.Street;
+                village = indonesiaCard.Village;
+                district = indonesiaCard.Area;
+                city = indonesiaCard.City;
+                province = indonesiaCard.Province;
+                religion = indonesiaCard.Religion;
+                maritalStatus = indonesiaCard.MaritalStatus;
+                occupation = indonesiaCard.Occupation;
+                nationality = indonesiaCard.Nationality;
+                expiryDate = parseExpiryDate(indonesiaCard.DueDate);
+              }
+            }
+            
+            // Fallback to ocrData if not found in CardVerifyResults
+            if (!birthPlace) birthPlace = ocrData?.placeOfBirth || ocrData?.birth_place || ocrData?.tempat_lahir || ocrData?.tempatLahir;
+            if (!birthDate) birthDate = parseBirthDate(ocrData?.dateOfBirth || ocrData?.birth_date || ocrData?.tanggal_lahir || ocrData?.tanggalLahir || ocrData?.Birthday);
+            if (!address) address = ocrData?.address || ocrData?.alamat || ocrData?.alamat_lengkap || ocrData?.alamatLengkap || ocrData?.FormattedAddress;
+            if (!rtRw) rtRw = ocrData?.rtRw || ocrData?.rt_rw || ocrData?.rt || ocrData?.rw;
+            if (!village) village = ocrData?.village || ocrData?.desa || ocrData?.kelurahan || ocrData?.desa_kelurahan || ocrData?.desaKelurahan;
+            if (!district) district = ocrData?.district || ocrData?.kecamatan || ocrData?.camat;
+            if (!city) city = ocrData?.city || ocrData?.kota || ocrData?.kabupaten || ocrData?.kota_kabupaten || ocrData?.kotaKabupaten;
+            if (!province) province = ocrData?.province || ocrData?.provinsi;
+            if (!religion) religion = ocrData?.religion || ocrData?.agama;
+            if (!maritalStatus) maritalStatus = ocrData?.maritalStatus || ocrData?.status_perkawinan || ocrData?.statusPerkawinan || ocrData?.perkawinan || ocrData?.status;
+            if (!occupation) occupation = ocrData?.occupation || ocrData?.pekerjaan || ocrData?.job || ocrData?.work;
+            if (!nationality) nationality = ocrData?.nationality || ocrData?.kewarganegaraan || ocrData?.warga_negara || ocrData?.wargaNegara || ocrData?.Nationality || 'WNI';
+            if (!expiryDate) expiryDate = parseExpiryDate(ocrData?.expiryDate || ocrData?.berlaku_hingga || ocrData?.berlakuHingga || ocrData?.valid_until || ocrData?.validUntil || ocrData?.berlaku || ocrData?.DueDate);
+
             const dbData = {
               user_id: userId,
               sdk_token: SdkToken,
@@ -349,22 +512,22 @@ app.post('/api/ekyc/result', async (req, res) => {
               ocr_data: ocrData,
               liveness_score: response.similarity ? response.similarity / 100 : null, // Convert percentage to decimal
               similarity_score: response.similarity ? response.similarity / 100 : null, // Convert percentage to decimal
-              ktp_number: ocrData?.nik || null,
-              name: ocrData?.name || null,
-              birth_place: ocrData?.placeOfBirth || null,
-              birth_date: ocrData?.dateOfBirth || null,
-              gender: ocrData?.gender || null,
-              address: ocrData?.address || null,
-              rt_rw: ocrData?.rtRw || null,
-              village: ocrData?.village || null,
-              district: ocrData?.district || null,
-              city: ocrData?.city || null,
-              province: ocrData?.province || null,
-              religion: ocrData?.religion || null,
-              marital_status: ocrData?.maritalStatus || null,
-              occupation: ocrData?.occupation || null,
-              nationality: ocrData?.nationality || null,
-              expiry_date: ocrData?.expiryDate || null,
+              ktp_number: ktpNumber,
+              name: name,
+              birth_place: birthPlace,
+              birth_date: birthDate,
+              gender: gender,
+              address: address,
+              rt_rw: rtRw,
+              village: village,
+              district: district,
+              city: city,
+              province: province,
+              religion: religion,
+              marital_status: maritalStatus,
+              occupation: occupation,
+              nationality: nationality,
+              expiry_date: expiryDate,
               raw_response: result,
               error_message: null
             };
@@ -948,6 +1111,65 @@ app.post('/api/ekyc/save-ocr-preview', async (req, res) => {
     console.log('   ocrData.LicenseNumber:', ocrData.LicenseNumber);
     console.log('   ocrData.licenseNumber:', ocrData.licenseNumber);
 
+    // KTP Number hanya dari IndonesiaIDCard dan NormalCardInfo.IndonesiaIDCard
+    const ktpNumber = (ocrData.IndonesiaIDCard && (ocrData.IndonesiaIDCard.LicenseNumber || ocrData.IndonesiaIDCard.licenseNumber)) ||
+                     (ocrData.NormalCardInfo && ocrData.NormalCardInfo.IndonesiaIDCard && (ocrData.NormalCardInfo.IndonesiaIDCard.LicenseNumber || ocrData.NormalCardInfo.IndonesiaIDCard.licenseNumber)) ||
+                     null;
+
+    // Enhanced name mapping
+    const name = ocrData.name || 
+                ocrData.nama || 
+                ocrData.full_name || 
+                ocrData.fullName || 
+                ocrData.nama_lengkap || 
+                ocrData.namaLengkap || 
+                ocrData.FullName || 
+                null;
+
+    // Enhanced gender mapping
+    const gender = ocrData.gender || 
+                  ocrData.jenis_kelamin || 
+                  ocrData.jenisKelamin || 
+                  ocrData.sex || 
+                  ocrData.jk || 
+                  (ocrData.Sex === 'LAKI-LAKI' ? 'L' : ocrData.Sex === 'PEREMPUAN' ? 'P' : null) || 
+                  null;
+
+    // Enhanced date parsing
+    const parseBirthDate = (dateStr) => {
+      if (!dateStr) return null;
+      
+      // Handle format "MALANG, 09-03-1997"
+      if (dateStr.includes(',')) {
+        const parts = dateStr.split(',');
+        if (parts.length >= 2) {
+          const datePart = parts[1].trim();
+          // Extract date from "09-03-1997"
+          const dateMatch = datePart.match(/(\d{2})-(\d{2})-(\d{4})/);
+          if (dateMatch) {
+            const [, day, month, year] = dateMatch;
+            return `${year}-${month}-${day}`;
+          }
+        }
+      }
+      
+      // Handle other formats
+      return dateStr;
+    };
+
+    // Enhanced expiry date parsing
+    const parseExpiryDate = (dateStr) => {
+      if (!dateStr) return null;
+      
+      // Handle "SEUMUR HIDUP" (lifetime)
+      if (dateStr === 'SEUMUR HIDUP' || dateStr === 'LIFETIME') {
+        return null; // Set to null for lifetime
+      }
+      
+      // Handle other date formats
+      return dateStr;
+    };
+
     const dbData = {
       user_id: userId,
       sdk_token: sdkToken || 'preview_token',
@@ -956,22 +1178,22 @@ app.post('/api/ekyc/save-ocr-preview', async (req, res) => {
       ocr_data: ocrData,
       liveness_score: null, // Belum ada liveness check
       similarity_score: null, // Belum ada similarity check
-      ktp_number: ocrData.nik || null,
-      name: ocrData.name || null,
-      birth_place: ocrData.placeOfBirth || null,
-      birth_date: ocrData.dateOfBirth || null,
-      gender: ocrData.gender || null,
-      address: ocrData.address || null,
-      rt_rw: ocrData.rtRw || null,
-      village: ocrData.village || null,
-      district: ocrData.district || null,
-      city: ocrData.city || null,
-      province: ocrData.province || null,
-      religion: ocrData.religion || null,
-      marital_status: ocrData.maritalStatus || null,
-      occupation: ocrData.occupation || null,
-      nationality: ocrData.nationality || null,
-      expiry_date: ocrData.expiryDate || null,
+      ktp_number: ktpNumber,
+      name: name,
+      birth_place: ocrData.placeOfBirth || ocrData.birth_place || ocrData.tempat_lahir || ocrData.tempatLahir || null,
+      birth_date: parseBirthDate(ocrData.dateOfBirth || ocrData.birth_date || ocrData.tanggal_lahir || ocrData.tanggalLahir || ocrData.Birthday),
+      gender: gender,
+      address: ocrData.address || ocrData.alamat || ocrData.alamat_lengkap || ocrData.alamatLengkap || ocrData.FormattedAddress || null,
+      rt_rw: ocrData.rtRw || ocrData.rt_rw || ocrData.rt || ocrData.rw || null,
+      village: ocrData.village || ocrData.desa || ocrData.kelurahan || ocrData.desa_kelurahan || ocrData.desaKelurahan || null,
+      district: ocrData.district || ocrData.kecamatan || ocrData.camat || null,
+      city: ocrData.city || ocrData.kota || ocrData.kabupaten || ocrData.kota_kabupaten || ocrData.kotaKabupaten || null,
+      province: ocrData.province || ocrData.provinsi || null,
+      religion: ocrData.religion || ocrData.agama || null,
+      marital_status: ocrData.maritalStatus || ocrData.status_perkawinan || ocrData.statusPerkawinan || ocrData.perkawinan || ocrData.status || null,
+      occupation: ocrData.occupation || ocrData.pekerjaan || ocrData.job || ocrData.work || null,
+      nationality: ocrData.nationality || ocrData.kewarganegaraan || ocrData.warga_negara || ocrData.wargaNegara || ocrData.Nationality || 'WNI',
+      expiry_date: parseExpiryDate(ocrData.expiryDate || ocrData.berlaku_hingga || ocrData.berlakuHingga || ocrData.valid_until || ocrData.validUntil || ocrData.berlaku || ocrData.DueDate),
       raw_response: JSON.stringify(ocrData),
       error_message: null,
       created_at: new Date()
